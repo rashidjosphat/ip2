@@ -1,5 +1,9 @@
-# Use an official Node runtime as a parent image
-FROM node:18-alpine AS build
+# Start from a minimal Alpine image
+FROM alpine:3.16.7
+
+# Install Node.js and npm
+RUN apk add --no-cache nodejs npm
+
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
@@ -7,18 +11,10 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install application dependencies
-RUN npm install
+RUN npm install --only=production
 
 # Copy the rest of the application code to the container
 COPY . .
-
-FROM alpine:3.16.7
-
-WORKDIR /app
-
-RUN apk update && apk add npm
-
-COPY --from=build /usr/src/app /app
 
 # Expose the port the app runs on
 EXPOSE 3000
