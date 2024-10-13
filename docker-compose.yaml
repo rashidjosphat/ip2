@@ -1,0 +1,22 @@
+services:
+  yolo-backend:
+    image: jorashid/yolo-backend:v1.0.0
+    build: /backend
+    stdin_open: true
+    tty: true
+    ports:
+      - '5000:5000'
+    networks:
+      - yolo-net
+    environment:
+      - MONGODB-ATLAS="mongodb+srv://james_rashid:james_rashid@cluster0.zsanm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+
+networks:
+  yolo-net:
+    name: yolo-net
+    driver: bridge
+    attachable: true
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16 
+          ip_range: 172.20.0.0/16 

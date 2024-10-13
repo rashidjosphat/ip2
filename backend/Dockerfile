@@ -29,11 +29,9 @@
 # CMD ["node", "server.js"]
 
 # build stage
-FROM alpine:3.16.7 AS build
+FROM node:18-alpine AS build
 
-WORKDIR /src/app
-
-RUN apk add --no-cache nodejs npm
+WORKDIR /usr/src/app
 
 COPY pack*.json /src/app/
 
@@ -47,6 +45,8 @@ FROM alpine:3.16.7
 WORKDIR /app
 
 COPY --from=build /src/app /app
+
+RUN apk add nodejs
 
 EXPOSE 5000
 
