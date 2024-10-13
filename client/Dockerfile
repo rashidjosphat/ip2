@@ -1,13 +1,15 @@
 #build stage
-FROM alpine:3.16.7 AS build
-
-RUN apk add --no-cache nodejs npm
+FROM node:18-alpine AS build
 
 WORKDIR /usr/src/app
 
+RUN apk add --no-cache nodejs npm
+
+
+
 COPY package*.json ./
 
-RUN npm install --only=production
+RUN npm install --omit=dev
 
 COPY . .
 
@@ -16,9 +18,11 @@ WORKDIR /app
 #run time stage
 FROM alpine:3.16.7
 
-RUN apk add --no-cache nodejs
+WORKDIR /app/
 
-WORKDIR /app
+
+RUN apk add --no-cache nodejs npm
+
 
 COPY --from=build /usr/src/app /app/
 
