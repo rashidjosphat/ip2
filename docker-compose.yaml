@@ -1,7 +1,10 @@
+version: '3.8'
 services:
+##
   yolo-backend:
     image: jorashid/yolo-backend:v1.0.0
-    build: /backend
+    build:
+      context: ./backend
     stdin_open: true
     tty: true
     ports:
@@ -10,6 +13,10 @@ services:
       - yolo-net
     environment:
       - MONGODB-ATLAS="mongodb+srv://james_rashid:james_rashid@cluster0.zsanm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    volumes:
+      - yolo-volumes:/app/
+  
+
 
 networks:
   yolo-net:
@@ -20,3 +27,6 @@ networks:
       config:
         - subnet: 172.20.0.0/16 
           ip_range: 172.20.0.0/16 
+
+volumes:
+  yolo-volumes:
