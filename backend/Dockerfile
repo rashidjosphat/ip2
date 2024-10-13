@@ -3,9 +3,9 @@ FROM node:18-alpine AS build
 
 WORKDIR /usr/src/app
 
-COPY package*.json usr/src/app/
+COPY package*.json /usr/src/app/
 
-RUN npm install --only=production
+RUN npm install --omit=dev
 
 COPY . .
 
