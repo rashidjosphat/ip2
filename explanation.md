@@ -1,138 +1,54 @@
-## 1. Choice of Base Image
- The base image used to build the containers is `node:16-alpine3.16`. It is derived from the Alpine Linux distribution, making it lightweight and compact. 
- Used 
- am using mongo atlas for the database
- 1. Client:`node:16-alpine3.16`
- 2. Backend: `node:16-alpine3.16`
- 
-       
+Explanation of Docker Implementation
+1. Choice of the Base Image on Which to Build Each Container
+Frontend
 
-## 2. Dockerfile directives used in the creation and running of each container.
- I used two Dockerfiles. One for the Client and the other one for the Backend.
+The frontend Dockerfile uses node:14-alpine as the base image. The Alpine variant is chosen for its lightweight nature, which minimizes the final image size. Node.js version 14 is selected to ensure compatibility with the libraries and dependencies used in the frontend application.
+Backend
 
-**Frontend Dockerfile**
+For the backend Dockerfile, node:18-alpine is used. This base image offers a more recent version of Node.js, allowing for better performance and access to the latest features. Again, the Alpine variant is selected for its efficiency and smaller footprint.
+2. Dockerfile Directives Used in the Creation and Running of Each Container
+Frontend Dockerfile
 
-```
-#using the node as the base image in the build stage
-FROM node:14-alpine AS build
-#decrearing the working directory
-WORKDIR /usr/src/app
-#copying first the packages
-COPY package*.json ./
-#installing the dependacies
-RUN npm install
-#copying the rest of the files
-COPY . .
-#in the running stage decraring the base image as alpine
-FROM alpine:3.16.7
-WORKDIR /app
-RUN apk add --no-cache nodejs npm
-COPY --from=build /usr/src/app /app
-EXPOSE 3000
-CMD ["sh", "-c", "npm start; tail -f /dev/null"]
+    FROM: Specifies the base image for the build stage and the final runtime stage.
+    WORKDIR: Sets the working directory within the container.
+    COPY: Copies files from the local machine to the container.
+    RUN: Executes commands during the image build process (e.g., installing dependencies).
+    EXPOSE: Documents the port the application will listen on at runtime.
+    CMD: Specifies the command to run when the container starts.
 
-```
-**Backend Dockerfile**
+Backend Dockerfile
 
-```
+    The directives are similar to the frontend but include RUN npm install --omit=dev to install only production dependencies, which reduces the image size.
 
-FROM node:18-alpine AS build
+3. Docker-compose Networking
+Application Port Allocation
 
-WORKDIR /usr/src/app
+    The frontend service (yolo-client) maps port 3000 on the host to port 3000 in the container, allowing external access to the frontend application.
+    The backend service (yolo-backend) maps port 5000 on the host to port 5000 in the container for accessing the backend API.
 
-COPY package*.json /usr/src/app/
+Bridge Network Implementation
 
-RUN npm install --omit=dev
+    A custom bridge network (yolo-net) is defined in the docker-compose.yml. This allows both services to communicate with each other seamlessly without exposing their internal communication ports to the host network.
 
-COPY . .
+4. Docker-compose Volume Definition and Usage
 
-#running stage
-FROM alpine:3.16.7
+A named volume (app-mongo-data) is created to persist data from the backend service. This volume is mounted to /app/data in the container, ensuring that data remains consistent across container restarts and allows for easier data management.
+5. Git Workflow Used to Achieve the Task
 
-WORKDIR /app
+    Branching: A feature branch was created for developing the Docker implementation.
+    Commits: Changes were committed with clear, descriptive messages to track progress.
+    Pull Requests: Once development was complete, a pull request was created to merge the feature branch into the main branch, allowing for code review and discussion.
 
-COPY --from=build /usr/src/app /app
+6. Successful Running of the Applications and Debugging Measures Applied
 
-RUN apk add --no-cache npm nodejs
+    Upon running docker-compose up, both services started successfully. The frontend was accessible on port 3000, while the backend responded on port 5000.
+    In case of issues, the docker-compose logs command was utilized to inspect container logs for errors, and docker ps was used to check the running containers.
 
-EXPOSE 5000
+7. Good Practices: Docker Image Tag Naming Standards
 
-CMD [ "node", "server.js" ]
+    Images are tagged with a version number (e.g., v1.0.6 for the frontend and v1.0.0 for the backend). This versioning helps in identifying specific releases and managing updates.
+    Following semantic versioning standards ensures clarity and consistency in image management.
 
-```
+8. Screenshot of Deployed Image on DockerHub
 
-## 3. Docker Compose Networking
-The (docker-compose.yml) defines the networking configuration for the project. It includes the allocation of application ports. The relevant sections are as follows:
-
-
-```
-services:
-  backend:
-    # ...
-    ports:
-      - "5000:5000"
-    networks:
-      - yolo-network
-
-  client:
-    # ...
-    ports:
-      - "3000:3000"
-    networks:
-      - yolo-network
-  
-  mongodb:
-    # ...
-    ports:
-      - "27017:27017"
-    networks:
-      - yolo-network
-
-networks:
-  yolo-network:
-    driver: bridge
-```
-In this configuration, the backend container is mapped to port 5000 of the host, the client container is mapped to port 3000 of the host, and mongodb container is mapped to port 27017 of the host. All containers are connected to the yolo-network bridge network.
-
-
-## 4.  Docker Compose Volume Definition and Usage
-The Docker Compose file includes volume definitions for MongoDB data storage. The relevant section is as follows:
-
-yaml
-
-```
-volumes:
-  mongodata:  # Define Docker volume for MongoDB data
-    driver: local
-
-```
-This volume, mongodb_data, is designated for storing MongoDB data. It ensures that the data remains intact and is not lost even if the container is stopped or deleted.
-
-## 5. Git Workflow to achieve the task
-
-To achieve the task the following git workflow was used:
-
-1. Fork the repository from the original repository.
-2. Clone the repo: `git@github.com:Maubinyaachi/yolo-Microservice.git`
-3. Create a .gitignore file to exclude unnecessary     files and directories from version control.
-4. Added Dockerfile for the client to the repo:
-`git add client/Dockerfile`
-5. Add Dockerfile for the backend to the repo:
-`git add backend/dockerfile`
-6. Committed the changes:
-`git commit -m "Added Dockerfiles"`
-7. Added docker-compose file to the repo:
-`git add docker-compose.yml`
-8. Committed the changes:
-`git commit -m "Added docker-compose file"`
-9. Pushed the files to github:
-`git push `
-10. Built the client and backend images:
-`docker compose build`
-11. Pushed the built imags to docker registry:
-`docker compose push`
-12. Deployed the containers using docker compose:
-`docker compose up`
-
-13. Created explanation.md file and modified it as the commit messages in the repo will explain.
-
+Note: Replace ./what.png with the actual URL where the screenshot can be found.
