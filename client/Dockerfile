@@ -9,4 +9,4 @@ FROM node:14-alpine
 WORKDIR /app
 COPY --from=build /usr/src/app /app
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["sh", "-c", "npm start; tail -f /dev/null"]
