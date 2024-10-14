@@ -18,7 +18,7 @@ services:
   
 # yolo flontend
   yolo-flontend:
-    image: jorashid/yolo-flontend:v1.0.0
+    image: jorashid/yolo-frontend:v1.0.6
     build: 
       context: ./client
     stdin_open: true
