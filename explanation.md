@@ -51,4 +51,4 @@ A named volume (app-mongo-data) is created to persist data from the backend serv
 
 8. Screenshot of Deployed Image on DockerHub
 
-Note: Replace ./what.png with the actual URL where the screenshot can be found.
+Note: Replace ![the docker image][./what.png] with the actual URL where the screenshot can be found.
