@@ -1,40 +1,99 @@
-version: '3.8'
+# version: '3.8'
+# services:
+# ## the yolo backend
+#   yolo-backend:
+#     image: jorashid/yolo-backend:v1.0.0
+#     build:
+#       context: ./backend
+#     stdin_open: true
+#     tty: true
+#     ports:
+#       - '5000:5000'
+#     networks:
+#       - yolo-net
+#     environment:
+#       - MONGODB_ATLAS="mongodb+srv://james_rashid:james_rashid@cluster0.zsanm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+
+#     volumes:
+#       - yolo-volumes:/app/
+  
+# # yolo flontend
+#   yolo-frontend:
+#     image: jorashid/yolo-frontend:v1.0.6
+#     build: 
+#       context: ./client
+#     stdin_open: true
+#     tty: true
+#     depends_on:
+#       - yolo-backend
+#     networks:
+#       - yolo-net
+#     ports:
+#       - 3000:3000
+#     volumes:
+#       - yolo-volumes:/app/
+
+# networks:
+#   yolo-net:
+#     name: yolo-net
+#     driver: bridge
+#     attachable: true
+#     ipam:
+#       config:
+#         - subnet: 172.20.0.0/16 
+#           ip_range: 172.20.0.0/16 
+
+# volumes:
+#   yolo-volumes:
+
+#This file builds the Docker images for a React/NodeJS application and runs it as microservices on Docker containers
+
+#To ensure successful execution, clone this entire repository and execute this file while in the root folder of the cloned repository
+
+#It's also a requirement to have Docker and the docker-compose plugin installed in your environment
+
+#To launch this app without having to clone the entire repository,use the docker-compose.yaml file to run the app
+
+version: "3.8"
+
 services:
-## the yolo backend
-  yolo-backend:
-    image: jorashid/yolo-backend:v1.0.0
-    build:
-      context: ./backend
+
+  #Builds the frontend Docker image and creates the frontend microservice
+  yolo-client:
+    image: jorashid/yolo-frontend:v1.0.6
+    build: ./client
+    container_name: yolo-client
     stdin_open: true
     tty: true
     ports:
-      - '5000:5000'
-    networks:
-      - yolo-net
-    environment:
-      - MONGODB_ATLAS="mongodb+srv://james_rashid:james_rashid@cluster0.zsanm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-    volumes:
-      - yolo-volumes:/app/
-  
-# yolo flontend
-  yolo-frontend:
-    image: jorashid/yolo-frontend:v1.0.6
-    build: 
-      context: ./client
-    stdin_open: true
-    tty: true
-    depends_on:
+      - "3000:3000"
+    depends_on: 
       - yolo-backend
     networks:
-      - yolo-net
-    ports:
-      - 3000:3000
-    volumes:
-      - yolo-volumes:/app/
+      - app-net
 
+  #Builds the backend Docker image and creates the backend microservice
+  yolo-backend:
+    image: jorashid/yolo-backend:v1.0.0
+    build: ./backend
+    container_name: yolo-backend
+    stdin_open: true
+    tty: true
+    #restart: always
+    ports:
+      - "5000:5000"
+    environment:
+       - MONGODB_ATLAS="mongodb+srv://james_rashid:james_rashid@cluster0.zsanm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+
+    networks:
+      - app-net
+
+  
+
+#Creates the network infrastructure necessary for the containers to communicate with each other
 networks:
-  yolo-net:
-    name: yolo-net
+  app-net:
+    name: app-net
     driver: bridge
     attachable: true
     ipam:
@@ -42,5 +101,7 @@ networks:
         - subnet: 172.20.0.0/16 
           ip_range: 172.20.0.0/16 
 
+#Creates a Docker volume that persists all the data stored in the database
 volumes:
-  yolo-volumes:
+  app-mongo-data:
+    driver: local
