@@ -1,24 +1,12 @@
-FROM node:18-alpine as build
+FROM node:14-alpine AS build
 
-WORKDIR /usr/src/app/
-
-COPY package*.json /usr/src/app/
-
+WORKDIR /usr/src/app
+COPY package*.json ./
 RUN npm install
-
 COPY . .
 
-#running stage
-FROM alpine:3.16.7
-
-WORKDIR /app/
-
-COPY --from=build /usr/src/app/ /app/
-
-
-RUN apk add --no-cache npm nodejs
-
-
+FROM node:14-alpine
+WORKDIR /app
+COPY --from=build /usr/src/app /app
 EXPOSE 3000
-
-CMD [ "npm", "start" ]
+CMD ["npm", "start"]
