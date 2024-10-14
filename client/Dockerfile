@@ -5,8 +5,9 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 
-FROM node:14-alpine
+FROM alpine:3.16.7
 WORKDIR /app
+RUN apk add --no-cache nodejs npm
 COPY --from=build /usr/src/app /app
 EXPOSE 3000
 CMD ["sh", "-c", "npm start; tail -f /dev/null"]
