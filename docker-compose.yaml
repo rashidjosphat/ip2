@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-##
+## the yolo backend
   yolo-backend:
     image: jorashid/yolo-backend:v1.0.0
     build:
@@ -12,11 +12,25 @@ services:
     networks:
       - yolo-net
     environment:
-      - MONGODB-ATLAS="mongodb+srv://james_rashid:james_rashid@cluster0.zsanm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+      - MONGODB_ATLAS="mongodb+srv://james_rashid:james_rashid@cluster0.zsanm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
     volumes:
       - yolo-volumes:/app/
   
-
+# yolo flontend
+  yolo-flontend:
+    image: jorashid/yolo-flontend:v1.0.0
+    build: 
+      context: ./client
+    stdin_open: true
+    tty: true
+    depends_on:
+      - yolo-backend
+    networks:
+      - yolo-net
+    ports:
+      - 3000:3000
+    volumes:
+      - yolo-volumes:/app/
 
 networks:
   yolo-net:
