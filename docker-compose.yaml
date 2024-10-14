@@ -17,7 +17,7 @@ services:
       - yolo-volumes:/app/
   
 # yolo flontend
-  yolo-flontend:
+  yolo-frontend:
     image: jorashid/yolo-frontend:v1.0.6
     build: 
       context: ./client
