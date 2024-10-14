@@ -70,7 +70,7 @@ services:
     depends_on: 
       - yolo-backend
     networks:
-      - app-net
+      - yolo-net
 
   #Builds the backend Docker image and creates the backend microservice
   yolo-backend:
@@ -86,13 +86,13 @@ services:
        - MONGODB_ATLAS="mongodb+srv://james_rashid:james_rashid@cluster0.zsanm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 
     networks:
-      - app-net
+      - yolo-net
 
   
 
 #Creates the network infrastructure necessary for the containers to communicate with each other
 networks:
-  app-net:
+  yolo-net:
     name: app-net
     driver: bridge
     attachable: true
