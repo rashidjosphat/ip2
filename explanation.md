@@ -1,95 +1,63 @@
 ## 1. Choice of Base Image
  The base image used to build the containers is `node:16-alpine3.16`. It is derived from the Alpine Linux distribution, making it lightweight and compact. 
  Used 
+ am using mongo atlas for the database
  1. Client:`node:16-alpine3.16`
  2. Backend: `node:16-alpine3.16`
- 3.Mongo : `mongo:6.0 `
+ 
        
 
 ## 2. Dockerfile directives used in the creation and running of each container.
  I used two Dockerfiles. One for the Client and the other one for the Backend.
 
-**Client Dockerfile**
+**Frontend Dockerfile**
 
 ```
-# Build stage
-FROM node:16-alpine3.16 as build-stage
-
-# Set the working directory inside the container
-WORKDIR /client
-
-# Copy package.json and package-lock.json
+#using the node as the base image in the build stage
+FROM node:14-alpine AS build
+#decrearing the working directory
+WORKDIR /usr/src/app
+#copying first the packages
 COPY package*.json ./
-
-# Install dependencies and clears the npm cache and removes any temporary files
-RUN npm install --only=production && \
-    npm cache clean --force && \
-    rm -rf /tmp/*
-
-# Copy the rest of the application code
+#installing the dependacies
+RUN npm install
+#copying the rest of the files
 COPY . .
-
-# Build the application and  remove development dependencies
-RUN npm run build && \
-    npm prune --production
-
-# Production stage
-FROM node:16-alpine3.16 as production-stage
-
-WORKDIR /client
-
-# Copy only the necessary files from the build stage
-COPY --from=build-stage /client/build ./build
-COPY --from=build-stage /client/public ./public
-COPY --from=build-stage /client/src ./src
-COPY --from=build-stage /client/package*.json ./
-
-# Set the environment variable for the app
-ENV NODE_ENV=production
-
-# Expose the port used by the app
+#in the running stage decraring the base image as alpine
+FROM alpine:3.16.7
+WORKDIR /app
+RUN apk add --no-cache nodejs npm
+COPY --from=build /usr/src/app /app
 EXPOSE 3000
-
-# Prune the node_modules directory to remove development dependencies and clears the npm cache and removes any temporary files
-
-
-# Start the application
-CMD ["npm", "start"]
+CMD ["sh", "-c", "npm start; tail -f /dev/null"]
 
 ```
 **Backend Dockerfile**
 
 ```
-# Set base image
-FROM node:16-alpine3.16
 
-# Set the working directory
-WORKDIR /backend
+FROM node:18-alpine AS build
 
-# Copy package.json and package-lock.json to the container
-COPY package*.json ./
+WORKDIR /usr/src/app
 
-# Install dependencies and clears the npm cache and removes any temporary files
-RUN npm install --only=production && \
-    npm cache clean --force && \
-    rm -rf /tmp/*
+COPY package*.json /usr/src/app/
 
-# Copy the rest of the application code
+RUN npm install --omit=dev
+
 COPY . .
 
-# Set the environment variable for the app
-ENV NODE_ENV=production
+#running stage
+FROM alpine:3.16.7
 
-# Expose the port used by the app
+WORKDIR /app
+
+COPY --from=build /usr/src/app /app
+
+RUN apk add --no-cache npm nodejs
+
 EXPOSE 5000
 
-# Prune the node_modules directory to remove development dependencies and clears the npm cache and removes any temporary files
-RUN npm prune --production && \
-    npm cache clean --force && \
-    rm -rf /tmp/*
-
-# Start the application
-CMD ["npm", "start"]
+CMD [ "node", "server.js" ]
 
 ```
 
